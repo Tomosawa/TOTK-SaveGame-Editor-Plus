@@ -14,7 +14,9 @@ namespace TOTK_SaveGame_Editor.SaveFile
         private int HEART_ADDRESS;          
         private int MAX_HEART_ADDRESS;     
         private int STAMINA_ADDRESS;
-        
+        private int PLAYTIME_ADDRESS;
+
+
         private int ARROW_ADDRESS;
 
         private int SWORD_ADDRESS;
@@ -87,6 +89,7 @@ namespace TOTK_SaveGame_Editor.SaveFile
         public int Rupees;
         public int Hearts;
         public int Stamina;
+        public int PlayTime;
 
         public List<Sword> Swords;
         public List<Bow> Bows;
@@ -118,6 +121,7 @@ namespace TOTK_SaveGame_Editor.SaveFile
             Rupees = ReadRupees();
             Hearts = ReadHearts();
             Stamina = ReadStamina();
+            PlayTime = ReadPlayTime();
 
             Arrows = ReadArrows();
 
@@ -142,6 +146,7 @@ namespace TOTK_SaveGame_Editor.SaveFile
             MAX_HEART_ADDRESS                       = FindBytePatternOffset(Byte_Patterns.MAX_HEART_PATTERN);
             HEART_ADDRESS                           = FindBytePatternOffset(Byte_Patterns.HEART_PATTERN);
             STAMINA_ADDRESS                         = FindBytePatternOffset(Byte_Patterns.STAMINA_PATTERN);
+            PLAYTIME_ADDRESS                        = FindBytePatternOffset(Byte_Patterns.PLAYTIME_PATTERN);
 
             ARROW_ADDRESS                           = ReadInt(FindBytePatternOffset(Byte_Patterns.ARROW_PATTERN)) + 0x04;
 
@@ -423,6 +428,11 @@ namespace TOTK_SaveGame_Editor.SaveFile
         public int ReadStamina()
         {
             return (int)ReadFloat(STAMINA_ADDRESS);
+        }
+
+        public int ReadPlayTime()
+        {
+            return ReadInt(PLAYTIME_ADDRESS);
         }
 
         public string ReadSword(int slot)

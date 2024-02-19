@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Web;
 using System.Windows.Forms;
 using TOTK_SaveGame_Editor.Data;
 using TOTK_SaveGame_Editor.Items;
@@ -17,21 +19,31 @@ namespace TOTK_SaveGame_Editor
             InitializeComponent();
             FillComboBoxes();
 
-            Size = new Size(351, 260);
+            //Size = new Size(351, 260);
             TabControlValues.Enabled = false;
         }
 
         private void OpenSaveFile(object sender, EventArgs e)
         {
-            OpenFileDialog FileDialog = new OpenFileDialog
+            string filePath = "";
+            if (listView_SaveData.SelectedItems.Count > 0)
             {
-                Filter = "progress (*.sav)|*.sav"
-            };
+                filePath = listView_SaveData.SelectedItems[0].Tag.ToString();
+            }
+            else
+            {
+                OpenFileDialog FileDialog = new OpenFileDialog
+                {
+                    Filter = "progress (*.sav)|*.sav"
+                };
 
-            if (FileDialog.ShowDialog() != DialogResult.OK) return;
-            if (!FileDialog.CheckFileExists) return;
+                if (FileDialog.ShowDialog() != DialogResult.OK) return;
+                if (!FileDialog.CheckFileExists) return;
 
-            _SaveFile = new TOTK_SaveFile(FileDialog.FileName);
+                filePath = FileDialog.FileName;
+            }
+
+            _SaveFile = new TOTK_SaveFile(filePath);
 
             if (!_SaveFile.IsLoaded)
             {
@@ -39,28 +51,21 @@ namespace TOTK_SaveGame_Editor
                 return;
             }
 
-            LblPath.Text = FileDialog.FileName;
+            LblPath.Text = filePath;
 
             BtnOpenSaveFile.Enabled = false;
             BtnPatchSaveFile.Enabled = true;
-            BtnReset.Enabled = true;
 
             TabControlValues.Enabled = true;
 
             SetValuesFromSavefile();
+
+            listView_SaveData.Enabled = false;
+
+            btnOpenFolder.Enabled = false;
         }
 
-        private void CloseSaveFile(object sender, EventArgs e)
-        {
-            LblPath.Text = "progress.sav";
-            _SaveFile = null;
-
-            BtnOpenSaveFile.Enabled = true;
-            BtnPatchSaveFile.Enabled = false;
-            BtnReset.Enabled = false;
-
-            TabControlValues.Enabled = false;
-        }
+        
 
         private void SetComboIndex(ComboBox comboBox, string value)
         {
@@ -72,29 +77,29 @@ namespace TOTK_SaveGame_Editor
 
         private void TabControlSelectedIndexChanged(object sender, EventArgs e)
         {
-            TabControl tabControl = (TabControl)sender;
+            //TabControl tabControl = (TabControl)sender;
 
-            switch (tabControl.SelectedIndex)
-            {
-                case 0:
-                    Size = new Size(351, 260);
-                    break;
-                case 1:
-                    Size = new Size(458, 341);
-                    break;
-                case 2:
-                    Size = new Size(458, 341);
-                    break;
-                case 3:
-                    Size = new Size(458, 341);
-                    break;
-                case 4:
-                    Size = new Size(458, 341);
-                    break;
-                case 5:
-                    Size = new Size(351, 541);
-                    break;
-            }
+            //switch (tabControl.SelectedIndex)
+            //{
+            //    case 0:
+            //        Size = new Size(351, 260);
+            //        break;
+            //    case 1:
+            //        Size = new Size(458, 341);
+            //        break;
+            //    case 2:
+            //        Size = new Size(458, 341);
+            //        break;
+            //    case 3:
+            //        Size = new Size(458, 341);
+            //        break;
+            //    case 4:
+            //        Size = new Size(458, 341);
+            //        break;
+            //    case 5:
+            //        Size = new Size(351, 541);
+            //        break;
+            //}
         }
 
         private void FillComboBoxes()
@@ -123,6 +128,7 @@ namespace TOTK_SaveGame_Editor
             InputRupees.Value = _SaveFile.Rupees;
             InputHearts.Value = _SaveFile.Hearts;
             InputStamina.Value = _SaveFile.Stamina;
+            lbPlayTime.Text = Utils.timeToString(_SaveFile.PlayTime);
 
             InputSwordPouch.Value = _SaveFile.PouchSizeSwords;
             InputBowPouch.Value = _SaveFile.PouchSizeBows;
@@ -247,7 +253,24 @@ namespace TOTK_SaveGame_Editor
 
             _SaveFile.PatchSaveFile();
 
+            CloseSaveFile();
+
             MessageBox.Show("Successfully patched savefile!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        }
+
+        private void CloseSaveFile()
+        {
+            LblPath.Text = "progress.sav";
+            _SaveFile = null;
+
+            BtnOpenSaveFile.Enabled = true;
+            BtnPatchSaveFile.Enabled = false;
+
+            TabControlValues.Enabled = false;
+
+            listView_SaveData.Enabled = true;
+            btnOpenFolder.Enabled = true;
         }
 
         private void SetAllCheckboxes(object sender, EventArgs e)
@@ -612,6 +635,40 @@ namespace TOTK_SaveGame_Editor
         private void OnArrowsChanged(object sender, EventArgs e)
         {
             _SaveFile.Arrows = (int)InputArrows.Value;
+        }
+
+        private void btnOpenFolder_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialogEx folderBrowserDialogEx = new FolderBrowserDialogEx();
+            if (folderBrowserDialogEx.ShowDialog(this) == DialogResult.OK)
+            {
+                imageListView.Images.Clear();
+                listView_SaveData.Items.Clear();
+                string[] dirs = Directory.GetDirectories(folderBrowserDialogEx.DirectoryPath);
+                foreach(string dir in dirs)
+                {
+                    if(dir.Contains("slot_"))
+                    {
+                        string captionPath = dir + "\\caption.sav";
+                        string progressPath = dir + "\\progress.sav";
+
+                        string folderName = dir.Substring(dir.LastIndexOf('\\') + 1);
+
+                        TOTK_CaptionFile captionFile = new TOTK_CaptionFile(captionPath);
+                        TOTK_SaveFile saveFile = new TOTK_SaveFile(progressPath);
+
+                        Image img = captionFile.readImage();
+                        imageListView.Images.Add(img);
+
+                        ListViewItem listViewItem = new ListViewItem();
+                        listViewItem.ImageIndex = imageListView.Images.Count - 1;
+                        listViewItem.SubItems.Add(folderName);
+                        listViewItem.SubItems.Add(Utils.timeToString(saveFile.ReadPlayTime()));
+                        listViewItem.Tag = progressPath;
+                        listView_SaveData.Items.Add(listViewItem);
+                    }
+                }
+            }
         }
     }
 }

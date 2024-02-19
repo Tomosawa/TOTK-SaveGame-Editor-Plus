@@ -70,6 +70,18 @@ namespace TOTK_SaveGame_Editor.SaveFile
             return BitConverter.ToUInt32(_Data, offset);
         }
 
+        public byte[] ReadArray(int startOffset,int endOffset)
+        {
+            byte[] buffer = new byte[endOffset - startOffset + 1];
+            int index = 0;
+            for(int i=startOffset; i <= endOffset; i++)
+            {
+                buffer[index] = _Data[i];
+                index++;
+            }
+            return buffer;
+        }
+
         public void WriteUInt32(int offset, uint value)
         {
             byte[] valueBytes = BitConverter.GetBytes(value);

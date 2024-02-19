@@ -81,6 +81,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\FolderBrowserDialogEx.cs" />
+    <Compile Include="Data\SwordsData.cs" />
     <Compile Include="Items\Armor.cs" />
     <Compile Include="Items\Bow.cs" />
     <Compile Include="Data\GameData.cs" />
@@ -97,7 +99,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveFile\SaveFile.cs" />
+    <Compile Include="SaveFile\TOTK_CaptionFile.cs" />
     <Compile Include="SaveFile\TOTK_SaveFile.cs" />
+    <Compile Include="SaveFile\Utils.cs" />
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>

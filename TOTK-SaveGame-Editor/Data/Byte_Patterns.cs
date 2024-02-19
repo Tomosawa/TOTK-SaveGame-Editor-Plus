@@ -8,6 +8,7 @@
         public static byte[] HEART_PATTERN                  = new byte[] { 0x80, 0x55, 0xAB, 0x31 };
         public static byte[] STAMINA_PATTERN                = new byte[] { 0x74, 0x2C, 0x21, 0xF9 };
         public static byte[] ARROW_PATTERN                  = new byte[] { 0x94, 0x7D, 0xB2, 0x53 };
+        public static byte[] PLAYTIME_PATTERN               = new byte[] { 0x64, 0xf5, 0x73, 0xe5 };
 
         //Items
         public static byte[] SWORD_PATTERN                  = new byte[] { 0xBE, 0xD0, 0xEF, 0x65 };
